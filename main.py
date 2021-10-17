@@ -25,12 +25,13 @@ while not cv2.waitKey(20) & 0xFF == ord('q'):
             cv2.destroyAllWindows()
             countImg += 1'''
         
-        if leiture == False:
+        # if leiture == False:
+        if cv2.waitKey(20) & 0xFF == ord('p'):
             for k in range(20):
                 imgCrop = frame_color[y:y+h, x:x+w]
                 cv2.imwrite(f'images/s1/teste{countImg}.jpg', frame_color)
                 countImg += 1
-            leiture = True
+            # leiture = True
         
 
     cv2.imshow('color', frame_color)

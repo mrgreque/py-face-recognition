@@ -3,7 +3,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-subjects = ["", "Gabriel"]
+subjects = ["", "O loko bicho", "Beckham"]
 
 def detect_face(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -48,6 +48,11 @@ def prepare_training_data(path):
 
             face, rect = detect_face(image)
 
+            (x,y,w,h) = rect
+
+            cv2.rectangle(face, (x, y), (x+w, y+h), (0,255,255), 4)
+            cv2.imshow('Face detectada', face)
+
             if face is not None:
                 faces.append(face)
                 labels.append(label)
@@ -55,7 +60,6 @@ def prepare_training_data(path):
     cv2.destroyAllWindows()
     cv2.waitKey(1)
     cv2.destroyAllWindows()
-
     return faces, labels
 
 print('Preparing data')
@@ -81,27 +85,24 @@ def predict(test_img):
     face, rect = detect_face(img)
 
     label = face_recognizer.predict(face)
-    label_text = subjects[label]
+    try: 
+        label_text = subjects[label[0]]
+    except:
+        label_text = 'Nao identificado'
 
     draw_rectangle(img, rect)
     draw_text(img, label_text, rect[0], rect[1]-5)
 
     return img
 
-capture = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+# capture = cv2.VideoCapture(0) -> em construção
 # capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 # capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 400)
 
-leiture = False
-countImg = 1
 while not cv2.waitKey(20) & 0xFF == ord('q'):
-    ret, frame_color = capture.read()
-
-    try:
-        predicted_img = predict(frame_color)
-
-        cv2.imshow(cv2.cvtColor(predicted_img, cv2.COLOR_BGR2GRAY))
-    except:
-        cv2.imshow('ops',frame_color)
-
+    # ret, frame_color = capture.read() -> em construção
+    # frame = cv2.imread('fausto.jpg') -> descomentar para teste
+    frame = cv2.imread('beck.jpg')
+    predicted_img = predict(frame)
+    cv2.imshow('Reconhecimento Facial', predicted_img)
     
