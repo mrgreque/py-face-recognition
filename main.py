@@ -42,19 +42,23 @@ while not cv2.waitKey(20) & 0xFF == ord('q'):
 
                 with open('./subjects.js', 'r') as file:
                     print('Abrindo arquivo')
-                    subjects = json.load(file)
-                print(subjects)
+                    subjects = file.read()
+                    subjects = subjects.replace('[','')
+                    subjects = subjects.replace(']','')
+                    subjects = subjects.split(',')
                 subjects.append(subjectName)
 
-                with open('./subjects.js', 'r') as file:
+                with open('./subjects.js', 'w') as file:
                     print('Salvar arquivo')
-                    json.dump(subjects, file,
-                              ensure_ascii=False, indent=4)
+                    subjects = str(subjects)
+                    subjects = subjects.replace(' ','')
+                    subjects = subjects.replace('"','')
+                    file.write(str(subjects))
 
                 for k in range(20):
                     imgCrop = frame_color[y:y+h, x:x+w]
                     cv2.imwrite(
-                        f'images/s{numero}/teste{countImg}.jpg', frame_color)
+                        f'images/s{numero}/{subjectName}{countImg}.jpg', frame_color)
                     countImg += 1
             # leiture = True
 

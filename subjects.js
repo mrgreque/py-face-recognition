@@ -1,5 +1,1 @@
-[
-    "",
-    "O loko bicho",
-    "Beckham",
-]
+['','Oloko bicho','Beckham']

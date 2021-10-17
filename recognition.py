@@ -6,7 +6,13 @@ import json
 
 subjects = []
 with open('./subjects.js', 'r') as file:
-    subjects = json.load(file)
+    # subjects = json.load(file)
+    subjects = file.read()
+    subjects = subjects.replace('[','')
+    subjects = subjects.replace(']','')
+    subjects = subjects.replace("'",'')
+    subjects = subjects.split(',')
+    print(subjects)
 # subjects = ["", "O loko bicho", "Beckham"]
 
 
