@@ -2,8 +2,13 @@ import cv2
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import json
 
-subjects = ["", "O loko bicho", "Beckham"]
+subjects = []
+with open('./subjects.js', 'r') as file:
+    subjects = json.load(file)
+# subjects = ["", "O loko bicho", "Beckham"]
+
 
 def detect_face(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -16,6 +21,7 @@ def detect_face(img):
     (x, y, w, h) = faces[0]
 
     return gray[y:y+h, x:x+w], faces[0]
+
 
 def prepare_training_data(path):
 
@@ -48,9 +54,9 @@ def prepare_training_data(path):
 
             face, rect = detect_face(image)
 
-            (x,y,w,h) = rect
+            (x, y, w, h) = rect
 
-            cv2.rectangle(face, (x, y), (x+w, y+h), (0,255,255), 4)
+            cv2.rectangle(face, (x, y), (x+w, y+h), (0, 255, 255), 4)
             cv2.imshow('Face detectada', face)
 
             if face is not None:
@@ -62,6 +68,7 @@ def prepare_training_data(path):
     cv2.destroyAllWindows()
     return faces, labels
 
+
 print('Preparing data')
 faces, labels = prepare_training_data('images')
 print('Data prepared')
@@ -72,20 +79,26 @@ print('Total labels: ', len(labels))
 face_recognizer = cv2.face.LBPHFaceRecognizer_create()
 face_recognizer.train(faces, np.array(labels))
 
+
 def draw_rectangle(img, rect):
     (x, y, w, h) = rect
     cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
-    
+
+
 def draw_text(img, text, x, y):
     cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 255, 0), 2)
 
-def predict(test_img):
-    img = test_img.copy()
+
+def predict(imagemCrua):
+    img = imagemCrua.copy()
 
     face, rect = detect_face(img)
 
+    if face is None:
+        return imagemCrua
+
     label = face_recognizer.predict(face)
-    try: 
+    try:
         label_text = subjects[label[0]]
     except:
         label_text = 'Nao identificado'
@@ -95,14 +108,15 @@ def predict(test_img):
 
     return img
 
-# capture = cv2.VideoCapture(0) -> em construção
-# capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-# capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 400)
+
+capture = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 while not cv2.waitKey(20) & 0xFF == ord('q'):
-    # ret, frame_color = capture.read() -> em construção
-    # frame = cv2.imread('fausto.jpg') -> descomentar para teste
-    frame = cv2.imread('beck.jpg')
-    predicted_img = predict(frame)
+    ret, frameCam = capture.read()
+    gray = cv2.cvtColor(frameCam, cv2.COLOR_BGR2GRAY)
+    cv2.imshow('color', frameCam)
+
+    predicted_img = predict(frameCam)
     cv2.imshow('Reconhecimento Facial', predicted_img)
-    
