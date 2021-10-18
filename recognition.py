@@ -126,3 +126,7 @@ while not cv2.waitKey(20) & 0xFF == ord('q'):
 
     predicted_img = predict(frameCam)
     cv2.imshow('Reconhecimento Facial', predicted_img)
+
+    '''img = cv2.imread("bolso.jpg")    
+    predicted_img = predict(img)
+    cv2.imshow('TEste',predicted_img)'''
