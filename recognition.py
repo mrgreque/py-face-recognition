@@ -8,9 +8,9 @@ subjects = []
 with open('./subjects.js', 'r') as file:
     # subjects = json.load(file)
     subjects = file.read()
-    subjects = subjects.replace('[','')
-    subjects = subjects.replace(']','')
-    subjects = subjects.replace("'",'')
+    subjects = subjects.replace('[', '')
+    subjects = subjects.replace(']', '')
+    subjects = subjects.replace("'", '')
     subjects = subjects.split(',')
     print(subjects)
 # subjects = ["", "O loko bicho", "Beckham"]
@@ -60,14 +60,15 @@ def prepare_training_data(path):
 
             face, rect = detect_face(image)
 
-            (x, y, w, h) = rect
-
-            cv2.rectangle(face, (x, y), (x+w, y+h), (0, 255, 255), 4)
-            cv2.imshow('Face detectada', face)
-
             if face is not None:
-                faces.append(face)
-                labels.append(label)
+                (x, y, w, h) = rect
+
+                cv2.rectangle(face, (x, y), (x+w, y+h), (0, 255, 255), 4)
+                cv2.imshow('Face detectada', face)
+
+                if face is not None:
+                    faces.append(face)
+                    labels.append(label)
 
     cv2.destroyAllWindows()
     cv2.waitKey(1)
@@ -104,8 +105,12 @@ def predict(imagemCrua):
         return imagemCrua
 
     label = face_recognizer.predict(face)
+    print(label)
     try:
-        label_text = subjects[label[0]]
+        if label[1] < 80:
+            label_text = subjects[label[0]]
+        else:
+            label_text = 'Nao identificado'
     except:
         label_text = 'Nao identificado'
 
@@ -121,12 +126,8 @@ capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 while not cv2.waitKey(20) & 0xFF == ord('q'):
     ret, frameCam = capture.read()
-    gray = cv2.cvtColor(frameCam, cv2.COLOR_BGR2GRAY)
-    cv2.imshow('color', frameCam)
+    #gray = cv2.cvtColor(frameCam, cv2.COLOR_BGR2GRAY)
+    #cv2.imshow('color', frameCam)
 
     predicted_img = predict(frameCam)
     cv2.imshow('Reconhecimento Facial', predicted_img)
-
-    '''img = cv2.imread("bolso.jpg")    
-    predicted_img = predict(img)
-    cv2.imshow('TEste',predicted_img)'''

@@ -18,7 +18,37 @@ pastas = [x[0] for x in os.walk('./images/')]
 numero = int(''.join([x[0] for x in pastas[-1] if x[0].isnumeric()]))+1
 
 
+def showText(img, text, offsety=0):
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    textsize = cv2.getTextSize(text, font, 0.7, 2)[0]
+    textX = (img.shape[1] - textsize[0]) // 2
+    textY = (img.shape[0] + textsize[1]) - offsety
+    cv2.putText(img, text, (textX, textY), font, 0.7, (255, 255, 255), 2)
+
+
+def adicionandoSubject(name):
+    os.mkdir(f'images/s{numero}/')
+    subjects = []
+
+    with open('./subjects.js', 'r') as file:
+        print('Abrindo arquivo')
+        subjects = file.read()
+        subjects = subjects.replace('[', '')
+        subjects = subjects.replace(']', '')
+        subjects = subjects.split(',')
+    subjects.append(name)
+
+    with open('./subjects.js', 'w') as file:
+        print('Salvar arquivo')
+        subjects = str(subjects)
+        subjects = subjects.replace(' ', '')
+        subjects = subjects.replace('"', '')
+        file.write(str(subjects))
+
+
 subjectName = input('Digite o Nome do Sujeito:')
+adicionandoSubject(subjectName)
 
 
 while not cv2.waitKey(20) & 0xFF == ord('q'):
@@ -28,38 +58,20 @@ while not cv2.waitKey(20) & 0xFF == ord('q'):
 
     faces = faceClassifier.detectMultiScale(gray)
 
+    showText(
+        frame_color, f'Pressione P para Fotografar [{countImg-1}/20]', 340)
+    showText(frame_color, 'Por favor mova seu rosto em diferentes Angulos.', 40)
+
     for x, y, w, h in faces:
         cv2.rectangle(frame_color, (x, y), (x+w, y+h), (0, 0, 255), 2)
 
-        # if leiture == False:
         if cv2.waitKey(20) & 0xFF == ord('p'):
             print('P Apertado')
-            if not os.path.exists(f'images/s{numero}/'):
-                print('Fazendo Path')
-
-                os.mkdir(f'images/s{numero}/')
-                subjects = []
-
-                with open('./subjects.js', 'r') as file:
-                    print('Abrindo arquivo')
-                    subjects = file.read()
-                    subjects = subjects.replace('[','')
-                    subjects = subjects.replace(']','')
-                    subjects = subjects.split(',')
-                subjects.append(subjectName)
-
-                with open('./subjects.js', 'w') as file:
-                    print('Salvar arquivo')
-                    subjects = str(subjects)
-                    subjects = subjects.replace(' ','')
-                    subjects = subjects.replace('"','')
-                    file.write(str(subjects))
-
-                for k in range(20):
-                    imgCrop = frame_color[y:y+h, x:x+w]
-                    cv2.imwrite(
-                        f'images/s{numero}/{subjectName}{countImg}.jpg', frame_color)
-                    countImg += 1
+            if os.path.exists(f'images/s{numero}/'):
+                imgCrop = gray[y:y+h, x:x+w]
+                cv2.imwrite(
+                    f'images/s{numero}/{subjectName}{countImg}.jpg', imgCrop)
+                countImg += 1
             # leiture = True
 
     cv2.imshow('color', frame_color)

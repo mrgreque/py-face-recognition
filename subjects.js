@@ -1,1 +1,1 @@
-['','Oloko bicho','Beckham','Bozo']
+['','Olokobicho','Beckham','Bozo']
