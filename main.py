@@ -6,16 +6,15 @@ import json
 xml_haar_cascade = 'haarcascade_frontalface_alt2.xml'
 faceClassifier = cv2.CascadeClassifier(xml_haar_cascade)
 
-capture = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+capture = cv2.VideoCapture('http://192.168.0.100:8080/video')
 capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 400)
+capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 leiture = False
 countImg = 1
 
 
 pastas = [x[0] for x in os.walk('./images/')]
-numero = int(''.join([x[0] for x in pastas[-1] if x[0].isnumeric()]))+1
 
 
 def showText(img, text, offsety=0):
@@ -27,28 +26,8 @@ def showText(img, text, offsety=0):
     cv2.putText(img, text, (textX, textY), font, 0.7, (255, 255, 255), 2)
 
 
-def adicionandoSubject(name):
-    os.mkdir(f'images/s{numero}/')
-    subjects = []
-
-    with open('./subjects.js', 'r') as file:
-        print('Abrindo arquivo')
-        subjects = file.read()
-        subjects = subjects.replace('[', '')
-        subjects = subjects.replace(']', '')
-        subjects = subjects.split(',')
-    subjects.append(name)
-
-    with open('./subjects.js', 'w') as file:
-        print('Salvar arquivo')
-        subjects = str(subjects)
-        subjects = subjects.replace(' ', '')
-        subjects = subjects.replace('"', '')
-        file.write(str(subjects))
-
-
 subjectName = input('Digite o Nome do Sujeito:')
-adicionandoSubject(subjectName)
+os.mkdir(f'images/{subjectName}/')
 
 
 while not cv2.waitKey(20) & 0xFF == ord('q'):
@@ -59,18 +38,18 @@ while not cv2.waitKey(20) & 0xFF == ord('q'):
     faces = faceClassifier.detectMultiScale(gray)
 
     showText(
-        frame_color, f'Pressione P para Fotografar [{countImg-1}/20]', 340)
-    showText(frame_color, 'Por favor mova seu rosto em diferentes Angulos.', 40)
+        frame_color, f'Pressione P para Fotografar', 340)
+    showText(frame_color, 'Por favor tire algumas fotos do Seu Rosto. Q para Sair', 40)
 
     for x, y, w, h in faces:
         cv2.rectangle(frame_color, (x, y), (x+w, y+h), (0, 0, 255), 2)
 
         if cv2.waitKey(20) & 0xFF == ord('p'):
             print('P Apertado')
-            if os.path.exists(f'images/s{numero}/'):
+            if os.path.exists(f'images/{subjectName}/'):
                 imgCrop = gray[y:y+h, x:x+w]
                 cv2.imwrite(
-                    f'images/s{numero}/{subjectName}{countImg}.jpg', imgCrop)
+                    f'images/{subjectName}/{countImg}.jpg', frame_color)
                 countImg += 1
             # leiture = True
 

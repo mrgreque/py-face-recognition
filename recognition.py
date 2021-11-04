@@ -3,22 +3,14 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import json
+from PIL import Image
 
-subjects = []
-with open('./subjects.js', 'r') as file:
-    # subjects = json.load(file)
-    subjects = file.read()
-    subjects = subjects.replace('[', '')
-    subjects = subjects.replace(']', '')
-    subjects = subjects.replace("'", '')
-    subjects = subjects.split(',')
-    print(subjects)
-# subjects = ["", "O loko bicho", "Beckham"]
+face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt2.xml')
+names = []
 
 
 def detect_face(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt2.xml')
     faces = face_cascade.detectMultiScale(gray)
 
     if (len(faces) == 0):
@@ -29,55 +21,48 @@ def detect_face(img):
     return gray[y:y+h, x:x+w], faces[0]
 
 
-def prepare_training_data(path):
-
-    dirs = os.listdir(f'{path}')
+def prepare_training_data(image_dir):
 
     faces = []
     labels = []
+    index = 0
+    for root, dirs, files in os.walk(image_dir):
+        for file in files:
+            if file.endswith("png") or file.endswith("jpg"):
+                path = os.path.join(root, file)
+                label = os.path.basename(root).replace(" ", "-").lower()
+                image = cv2.imread(path)
 
-    for dir_name in dirs:
+                # pil_image = Image.open(path).convert("L")  # grayscale
+                # size = (550, 550)
+                # final_image = pil_image.resize(size, Image.ANTIALIAS)
+                # image_array = np.array(final_image, "uint8")
 
-        if not dir_name.startswith('s'):
-            continue
+                #cv2.imshow('Training...', image)
+                cv2.waitKey(100)
 
-        label = int(dir_name.replace('s', ''))
-
-        subject_dir_path = path + '/' + dir_name
-        subject_images_names = os.listdir(subject_dir_path)
-
-        for img_name in subject_images_names:
-
-            if img_name.startswith('.'):
-                continue
-
-            image_path = subject_dir_path + '/' + img_name
-
-            image = cv2.imread(image_path)
-
-            cv2.imshow('Training...', image)
-            cv2.waitKey(100)
-
-            face, rect = detect_face(image)
-
-            if face is not None:
-                (x, y, w, h) = rect
-
-                cv2.rectangle(face, (x, y), (x+w, y+h), (0, 255, 255), 4)
-                cv2.imshow('Face detectada', face)
+                face, rect = detect_face(image)
 
                 if face is not None:
-                    faces.append(face)
-                    labels.append(label)
+                    (x, y, w, h) = rect
+
+                    #cv2.rectangle(face, (x, y), (x+w, y+h), (0, 255, 255), 4)
+                    cv2.imshow('Face detectada', face)
+
+                    if face is not None:
+                        faces.append(face)
+                        labels.append(index)
+                        index += 1
+                        names.append(label)
 
     cv2.destroyAllWindows()
     cv2.waitKey(1)
     cv2.destroyAllWindows()
-    return faces, labels
+    return faces, labels, names
 
 
 print('Preparing data')
-faces, labels = prepare_training_data('images')
+faces, labels, names = prepare_training_data('images')
 print('Data prepared')
 
 print('Total faces: ', len(faces))
@@ -92,8 +77,10 @@ def draw_rectangle(img, rect):
     cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
 
-def draw_text(img, text, x, y):
-    cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 255, 0), 2)
+def draw_text(img, text, rect):
+    (x, y, w, h) = rect
+    cv2.putText(img, text, (x, y-5),
+                cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 255, 0), 2)
 
 
 def predict(imagemCrua):
@@ -107,15 +94,15 @@ def predict(imagemCrua):
     label = face_recognizer.predict(face)
     print(label)
     try:
-        if label[1] < 80:
-            label_text = subjects[label[0]]
+        if label[1] < 85:
+            label_text = names[label[0]]
         else:
             label_text = 'Nao identificado'
     except:
         label_text = 'Nao identificado'
 
     draw_rectangle(img, rect)
-    draw_text(img, label_text, rect[0], rect[1]-5)
+    draw_text(img, label_text, rect)
 
     return img
 
