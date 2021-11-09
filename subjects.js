@@ -1,1 +1,0 @@
-['','Olokobicho','Beckham','Bozo']

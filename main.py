@@ -6,7 +6,7 @@ import json
 xml_haar_cascade = 'haarcascade_frontalface_alt2.xml'
 faceClassifier = cv2.CascadeClassifier(xml_haar_cascade)
 
-capture = cv2.VideoCapture('http://192.168.0.100:8080/video')
+capture = cv2.VideoCapture(0)
 capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 

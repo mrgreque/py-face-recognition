@@ -94,7 +94,12 @@ def predict(imagemCrua):
     label = face_recognizer.predict(face)
     print(label)
     try:
-        if label[1] < 85:
+        if label[1] < 55:
+
+            best_match = 30
+            value = label[1]
+
+            #label_text = f'{names[label[0]]} {( 100 - ((value-best_match) / (best_match/100))):.2f}%'
             label_text = names[label[0]]
         else:
             label_text = 'Nao identificado'
